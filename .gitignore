@@ -1,0 +1,5 @@
+.DS_Store
+*.log
+extract_flowers.py
+flowers-preview.html
+borderimage.svg

@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>for divi.</title>
+  <meta name="description" content="two years.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="_flowers_inline.js"></script>
+
+  <style>
+    :root {
+      --paper: #ffffff;
+      --ink: #0a0a0a;
+      --ink-soft: #2d2d2d;
+      --mute: #9a9a9a;
+      --fade: rgba(10, 10, 10, 0.16);
+      --red:    #eb4d4b;
+      --pink:   #ff5f5f;
+      --blue:   #74b9ff;
+      --orange: #ffbe76;
+      --green:  #55d47b;
+      --deep:   #03aa6f;
+      --grey:   #535c68;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    body { min-height: 100vh; min-height: 100dvh; }
+
+    .mark {
+      position: fixed;
+      top: 22px;
+      left: 26px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      color: var(--mute);
+      z-index: 40;
+    }
+
+    /* TOP HALF — sticky illustration */
+    .graphic {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50vh;
+      height: 50dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      background: var(--paper);
+      pointer-events: none;
+    }
+    .graphic::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -40px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--paper), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+    .illo-wrap {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0.9) translateY(6px);
+      transition: opacity 380ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .illo-wrap.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    .illo {
+      width: clamp(120px, 16vw, 180px);
+      height: clamp(120px, 16vw, 180px);
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* polaroid used in the memories slot */
+    .polaroid {
+      background: #fdfdfb;
+      padding: 14px 14px 56px;
+      box-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.04),
+        0 4px 14px rgba(0, 0, 0, 0.08);
+      transform: rotate(-2deg);
+      user-select: none;
+      display: inline-block;
+      position: relative;
+    }
+    .polaroid-frame {
+      position: relative;
+      width: clamp(180px, 22vw, 236px);
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #eeeeee;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+    .pshot {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 700ms ease;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .pshot.active { opacity: 1; }
+    .polaroid-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 18px;
+      text-align: center;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      color: #a4a4a4;
+      letter-spacing: 0.06em;
+    }
+    .polaroid-hi { transform: rotate(-3deg); }
+    .polaroid-sticker {
+      position: absolute;
+      top: -22px;
+      right: -22px;
+      width: 62px;
+      height: 62px;
+      transform: rotate(16deg);
+      z-index: 2;
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+    }
+
+    /* BOTTOM HALF — scrolling text */
+    .text-column {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 50vh 32px 60vh;
+      position: relative;
+      z-index: 10;
+    }
+
+    .text-item {
+      min-height: 40vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: clamp(22px, 2.6vw, 30px);
+      font-weight: 500;
+      line-height: 1.4;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      opacity: 0.18;
+      transition: opacity 480ms ease;
+      padding: 4vh 0;
+    }
+    .text-item.active { opacity: 1; }
+
+    .text-item p { max-width: 620px; margin: 0 auto; }
+
+    .text-item .n {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .n.red    { color: var(--red); }
+    .n.pink   { color: var(--pink); }
+    .n.blue   { color: var(--blue); }
+    .n.orange { color: var(--orange); }
+    .n.green  { color: var(--green); }
+    .n.deep   { color: var(--deep); }
+    .n.infinity { font-family: 'Geist', sans-serif; font-size: 1.4em; letter-spacing: 0; }
+
+    /* HERO variant — bigger and centered */
+    .text-item.hero {
+      font-size: clamp(48px, 9vw, 108px);
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      line-height: 1;
+      min-height: 46vh;
+    }
+    .text-item.hero .comma { color: var(--red); }
+
+    /* LETTER paragraphs — slightly smaller for reading */
+    .text-item.letter {
+      font-size: clamp(19px, 2vw, 24px);
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--ink-soft);
+      min-height: 44vh;
+    }
+    .text-item.letter.active { color: var(--ink); }
+    .text-item.letter em {
+      font-style: normal;
+      color: var(--red);
+      font-weight: 500;
+    }
+
+    /* SIGN-OFF */
+    .text-item.signoff {
+      font-family: 'Geist Mono', monospace;
+      font-size: clamp(15px, 1.6vw, 18px);
+      font-weight: 400;
+      color: var(--ink-soft);
+      letter-spacing: 0.02em;
+      min-height: 60vh;
+    }
+    .text-item.signoff .heart-inline {
+      color: var(--pink);
+      display: inline-block;
+      transform: translateY(1px);
+    }
+
+    /* Progress bar at the top */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--pink);
+      width: 0;
+      z-index: 50;
+      transition: width 60ms linear;
+    }
+
+    .scroll-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      color: var(--mute);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      z-index: 30;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .scroll-hint.hidden { opacity: 0; }
+
+    /* Mobile — phones */
+    @media (max-width: 640px) {
+      .mark {
+        top: max(14px, env(safe-area-inset-top));
+        left: max(16px, env(safe-area-inset-left));
+        font-size: 11px;
+      }
+      .graphic {
+        height: 44vh;
+        height: 44dvh;
+        padding: 0 20px;
+      }
+      .text-column {
+        padding: 44vh 18px 55vh;
+        padding: 44dvh 18px 55dvh;
+        max-width: 100%;
+      }
+      .text-item {
+        min-height: 38vh;
+        min-height: 38dvh;
+        font-size: clamp(19px, 5.2vw, 26px);
+        line-height: 1.4;
+        padding: 3vh 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .text-item.hero {
+        font-size: clamp(42px, 13vw, 68px);
+        min-height: 40vh;
+        min-height: 40dvh;
+      }
+      .text-item.letter {
+        font-size: clamp(17px, 4.4vw, 22px);
+        line-height: 1.55;
+        min-height: 36vh;
+        min-height: 36dvh;
+      }
+      .text-item.signoff {
+        font-size: 13px;
+        min-height: 50vh;
+        min-height: 50dvh;
+      }
+      .text-item .n {
+        letter-spacing: -0.015em;
+      }
+      .illo {
+        width: clamp(88px, 20vw, 128px);
+        height: clamp(88px, 20vw, 128px);
+      }
+      .polaroid { padding: 12px 12px 44px; }
+      .polaroid-frame {
+        width: clamp(160px, 46vw, 200px);
+      }
+      .polaroid-caption {
+        font-size: 11px;
+        bottom: 15px;
+      }
+      .polaroid-sticker {
+        width: 48px;
+        height: 48px;
+        top: -16px;
+        right: -16px;
+      }
+      .polaroid-hi { transform: rotate(-2.5deg); }
+      .scroll-hint {
+        bottom: max(14px, env(safe-area-inset-bottom));
+        font-size: 10px;
+        letter-spacing: 0.2em;
+      }
+    }
+
+    /* Very small phones (iPhone SE, tiny Androids) */
+    @media (max-width: 380px) {
+      .text-item.hero { font-size: clamp(38px, 12vw, 56px); }
+      .polaroid-frame { width: 158px; }
+      .polaroid-sticker { width: 44px; height: 44px; top: -14px; right: -14px; }
+      .illo { width: 92px; height: 92px; }
+    }
+
+    /* Landscape phones — short viewport */
+    @media (max-height: 520px) and (orientation: landscape) {
+      .graphic {
+        height: 55vh;
+        height: 55dvh;
+      }
+      .text-column {
+        padding: 55vh 24px 55vh;
+        padding: 55dvh 24px 55dvh;
+      }
+      .text-item {
+        min-height: 55vh;
+        min-height: 55dvh;
+        font-size: clamp(18px, 3.2vw, 24px);
+      }
+      .text-item.hero { font-size: clamp(38px, 7vw, 56px); }
+      .text-item.letter {
+        font-size: clamp(16px, 2.4vw, 20px);
+        min-height: 55vh;
+        min-height: 55dvh;
+      }
+      .illo {
+        width: clamp(72px, 18vh, 120px);
+        height: clamp(72px, 18vh, 120px);
+      }
+      .polaroid { padding: 10px 10px 34px; }
+      .polaroid-frame { width: clamp(110px, 26vh, 170px); }
+      .polaroid-caption { font-size: 10px; bottom: 10px; }
+      .polaroid-sticker { width: 42px; height: 42px; top: -14px; right: -14px; }
+    }
+
+    /* ---------- CALENDAR ---------- */
+    .calendar {
+      position: relative;
+      background: var(--paper);
+      z-index: 30;
+      padding: 14vh 40px 10vh;
+      text-align: center;
+    }
+    .cal-header {
+      max-width: 720px;
+      margin: 0 auto 6vh;
+    }
+    .cal-eyebrow {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      color: var(--mute);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .cal-title {
+      font-size: clamp(36px, 5.5vw, 64px);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    .cal-title-n {
+      color: var(--red);
+      font-variant-numeric: tabular-nums;
+    }
+    .cal-sub {
+      font-size: clamp(15px, 1.7vw, 19px);
+      color: var(--ink-soft);
+      font-weight: 400;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 18px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    .cal-cell {
+      background: transparent;
+      padding: 16px 12px 14px;
+      text-align: center;
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cal-cell:hover {
+      transform: translateY(-6px);
+    }
+    .cal-flower {
+      width: 62px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .cal-flower svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* thicken the flower lines: add a matching stroke around the colored fills.
+       vector-effect keeps the line width visually constant across every flower
+       (each has a different viewBox scale). Only tinted paths get stroked so
+       the white cutouts stay transparent-looking. */
+    .cal-flower svg path[fill="currentColor"] {
+      stroke: currentColor;
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .cal-date {
+      font-family: 'Geist Mono', monospace;
+      font-size: 10.5px;
+      color: var(--mute);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .cal-note {
+      font-size: 12px;
+      line-height: 1.42;
+      color: var(--ink-soft);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-footer {
+      margin-top: 6vh;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      color: var(--mute);
+      letter-spacing: 0.04em;
+    }
+    /* the anniversary day quietly highlights via color, no box */
+    .cal-cell.anniv .cal-date { color: var(--red); }
+    .cal-cell.anniv .cal-note { color: var(--ink); font-weight: 500; }
+
+    @media (max-width: 900px) {
+      .cal-grid { grid-template-columns: repeat(5, 1fr); gap: 14px; }
+    }
+    @media (max-width: 640px) {
+      .calendar { padding: 10vh 18px 8vh; padding: 10dvh 18px 8dvh; }
+      .cal-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .cal-cell { padding: 12px 8px 10px; min-height: 170px; }
+      .cal-flower { width: 48px; height: 48px; }
+      .cal-note { font-size: 11px; }
+      .cal-title { margin-bottom: 12px; }
+    }
+    @media (max-width: 400px) {
+      .cal-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ---------- FINALE (flowers → bunch → bokeh + anniversary) ---------- */
+    .finale {
+      position: relative;
+      min-height: 110vh;
+      min-height: 110dvh;
+      background: #ffffff;
+      z-index: 35; /* above .calendar (30) so flying-flower children render in front of cal-cells */
+    }
+    .finale-inner {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      text-align: center;
+      padding: 0 24px 16vh;
+    }
+    /* paper bouquet wrapping — sits inside .finale, in front of flowers so it wraps around stems */
+    .bouquet-wrap {
+      position: absolute;
+      top: clamp(60px, 12vh, 90px); /* pulled up so paper wings overlap the flower stems (no visible gap) */
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(240px, 78vw, 400px);
+      max-width: calc(100vw - 24px);
+      height: auto;
+      z-index: 45; /* above all flying-flower z-indexes (6..40) so paper wraps in front */
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+      opacity: 0;
+    }
+
+    /* flying flower clones — absolute inside .finale so they scroll with the section */
+    .flying-flower {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform, opacity;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      z-index: 3;
+    }
+    .flying-flower svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* thicken flying flowers' lines the same way calendar flowers are thickened */
+    .flying-flower svg path[fill="currentColor"] {
+      stroke: currentColor;
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .finale-mark {
+      font-family: 'Geist Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    .finale-title {
+      font-size: clamp(40px, 9.5vw, 132px);
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      line-height: 1.02;
+      color: var(--ink);
+      margin-bottom: 36px;
+      opacity: 0;
+      transform: translateY(20px);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .finale-title .finale-comma { color: var(--red); }
+    .finale-hearts {
+      font-family: 'Geist Mono', monospace;
+      font-size: clamp(32px, 5vw, 52px);
+      color: var(--red);
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .finale-hehe {
+      font-family: 'Geist', sans-serif;
+      font-size: clamp(18px, 2.2vw, 24px);
+      color: var(--ink-soft);
+      font-style: italic;
+      font-weight: 300;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    /* softer bokeh sizing on mobile */
+    @media (max-width: 640px) {
+      .finale { min-height: 120vh; min-height: 120dvh; }
+      .finale-inner { padding: 10vh 16px 12vh; padding: 10dvh 16px 12dvh; }
+      .bokeh-dot { filter: blur(20px); }
+      .bouquet-wrap { top: clamp(48px, 9vh, 80px); }
+    }
+
+    /* very small phones — keep bouquet from crowding the anniversary text */
+    @media (max-width: 380px) {
+      .finale-title { font-size: clamp(36px, 11vw, 56px); }
+      .finale-inner { padding: 8vh 12px 10vh; padding: 8dvh 12px 10dvh; }
+      .bouquet-wrap { top: 48px; }
+    }
+
+    /* landscape phones — squat viewport, bouquet must not blow past the fold */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .finale { min-height: 140vh; min-height: 140dvh; }
+      .bouquet-wrap {
+        top: 24px;
+        width: clamp(200px, 42vh, 340px);
+      }
+      .finale-inner { padding: 6vh 24px 8vh; padding: 6dvh 24px 8dvh; }
+      .finale-title { font-size: clamp(32px, 6vw, 56px); margin-bottom: 18px; }
+      .finale-mark { margin-bottom: 16px; }
+      .finale-hearts { font-size: clamp(24px, 4vw, 40px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .illo-wrap, .text-item, .pshot, .bokeh-dot { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mark">for divi.</div>
+  <div class="progress" id="progress"></div>
+
+  <!-- FIXED TOP HALF: illustrations stacked, only .active is visible -->
+  <div class="graphic">
+    <div class="illo-wrap" data-key="hi">
+      <div class="polaroid polaroid-hi" id="polaroidHi">
+        <div class="polaroid-frame">
+          <img class="pshot active" src="photos/2.jpeg" alt="us">
+        </div>
+        <div class="polaroid-caption">us. two years.</div>
+        <img class="polaroid-sticker" id="illoHi" src="svg/1f44b.svg" alt="hi">
+      </div>
+    </div>
+    <div class="illo-wrap" data-key="hourglass">
+      <img class="illo" id="illoHourglass" src="svg/23f3.svg" alt="hourglass">
+    </div>
+    <div class="illo-wrap" data-key="heart">
+      <img class="illo" id="illoHeart" src="svg/2764.svg" alt="red heart">
+    </div>
+    <div class="illo-wrap" data-key="phone">
+      <img class="illo" id="illoPhone" src="svg/260e.svg" alt="telephone">
+    </div>
+    <div class="illo-wrap" data-key="camera">
+      <div class="polaroid" id="polaroid">
+        <div class="polaroid-frame">
+          <img class="pshot active" src="photos/1.jpeg" alt="us" loading="lazy" decoding="async">
+          <img class="pshot" src="photos/2.jpeg" alt="us" loading="lazy" decoding="async">
+          <img class="pshot" src="photos/3.jpeg" alt="us" loading="lazy" decoding="async">
+          <img class="pshot" src="photos/4.gif" alt="us" loading="lazy" decoding="async">
+          <img class="pshot" src="photos/5.jpg" alt="us" loading="lazy" decoding="async">
+          <img class="pshot" src="photos/6.jpg" alt="us" loading="lazy" decoding="async">
+        </div>
+        <div class="polaroid-caption">us &hearts;</div>
+      </div>
+    </div>
+    <div class="illo-wrap" data-key="party">
+      <img class="illo" id="illoParty" src="svg/1f973.svg" alt="party face">
+    </div>
+    <div class="illo-wrap" data-key="sprout">
+      <img class="illo" id="illoSprout" src="svg/1f331.svg" alt="seedling">
+    </div>
+    <div class="illo-wrap" data-key="letter">
+      <img class="illo" id="illoGrow" src="svg/1f497.svg" alt="growing heart">
+    </div>
+  </div>
+
+  <!-- BOTTOM HALF: scrolling text -->
+  <div class="text-column" id="col">
+
+    <div class="text-item hero" data-key="hi">
+      <p>hi<span class="comma">,</span> divi.</p>
+    </div>
+
+    <div class="text-item" data-key="hourglass">
+      <p>it's been <span class="n red" id="seconds">0</span> seconds since we chose each other.</p>
+    </div>
+
+    <div class="text-item" data-key="heart">
+      <p>in that time, our hearts have beaten <span class="n pink" id="heartbeats">0</span> times. side by side.</p>
+    </div>
+
+    <div class="text-item" data-key="phone">
+      <p>we've been on call for <span class="n blue">731</span> hours.</p>
+    </div>
+
+    <div class="text-item" data-key="camera">
+      <p>we've shared <span class="n orange infinity">&infin;</span> memories. the ones saved on our phones and the ones only we remember.</p>
+    </div>
+
+    <div class="text-item" data-key="party">
+      <p>we've shared <span class="n green infinity">&infin;</span> happiness. the loud kind and the quiet kind.</p>
+    </div>
+
+    <div class="text-item" data-key="sprout">
+      <p>and above all, we've shared a whole <span class="n deep">life.</span> yours, mine, ours.</p>
+    </div>
+
+    <!-- LETTER -->
+    <div class="text-item letter" data-key="letter">
+      <p>time has never felt so wrong. it says two years. but every day with you is a whole lifetime. every day i want to live with you, love you, hold you, protect you, take care of you.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>two years ago today, i opened up my heart to you. and thank god i did.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>as always, thank you. for putting your faith in me. for loving me. for staying. for always, always listening.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>thank you for laughing at the same dumb jokes like they're new. for staying on call at 3am after working the whole day and just hearing you breathe was enough to put me to sleep.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>thank you for choosing me. every single day. even the boring ones. even the hard ones. that's the part nobody tells you about love. it isn't a fall. it's a choice. and i'll choose you tomorrow. and the day after. and the one after that.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>you have been so strong for me. on the days i couldn't hold myself up, you held me. i don't think you know how much of me is still standing because of you. so much of me. all of me, maybe.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>you are my home, divi. not a place. a person. wherever you are, that's where i want to be. always.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p>i don't have big words to promise you. only small ones. i promise to show up. to try harder. to be softer. to hold your hand through everything that comes next, and everything after that, and everything after that too.</p>
+    </div>
+
+    <div class="text-item letter" data-key="letter">
+      <p><em>happy two years, my love. here's to the rest of them.</em></p>
+    </div>
+
+    <div class="text-item signoff" data-key="letter">
+      <p>yours, only ever yours <span class="heart-inline">&hearts;</span></p>
+    </div>
+
+  </div>
+
+  <!-- CALENDAR of the last 35 days — sibling of .text-column so its z-index beats the fixed graphic -->
+  <section class="calendar" id="calendar">
+    <div class="cal-header">
+      <p class="cal-eyebrow">and one small thing i made</p>
+      <h2 class="cal-title">the last <span class="cal-title-n">35</span> days.</h2>
+      <p class="cal-sub">i drew one flower for every day. one thought for every flower.</p>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <p class="cal-footer">— every day counted. every day counts.</p>
+  </section>
+
+  <!-- FINALE: actual calendar flowers fly out, land in the paper wrapping to form a real bouquet -->
+  <section class="finale" id="finale">
+    <img class="bouquet-wrap" src="wrapping.png" alt="" aria-hidden="true">
+    <div class="finale-inner">
+      <p class="finale-mark">two years &middot; today</p>
+      <h2 class="finale-title">happy anniversary<span class="finale-comma">,</span><br>my love.</h2>
+      <p class="finale-hearts">&lt;333</p>
+      <p class="finale-hehe">hehe</p>
+    </div>
+  </section>
+
+  <div class="scroll-hint" id="scrollHint">scroll &darr;</div>
+
+  <script>
+  (function () {
+    /* live counters */
+    const START = new Date('2024-09-05T00:00:00+05:30');
+    const HEART_BPM = 72;
+    const HEARTS = 2;
+    const fmt = (n) => new Intl.NumberFormat('en-IN').format(Math.floor(n));
+
+    const secondsEl = document.getElementById('seconds');
+    const heartbeatsEl = document.getElementById('heartbeats');
+
+    function tick () {
+      const now = new Date();
+      const s = (now - START) / 1000;
+      if (s < 0) return;
+      secondsEl.textContent = fmt(s);
+      heartbeatsEl.textContent = fmt(s * HEART_BPM * HEARTS / 60);
+    }
+    tick();
+    setInterval(tick, 90);
+
+    /* scroll-driven focus band + graphic swap */
+    const items = [...document.querySelectorAll('.text-item')];
+    const illos = [...document.querySelectorAll('.illo-wrap')];
+    const illoByKey = Object.fromEntries(illos.map(el => [el.dataset.key, el]));
+    const progress = document.getElementById('progress');
+    const hint = document.getElementById('scrollHint');
+
+    let currentKey = null;
+    let ticking = false;
+
+    function update () {
+      ticking = false;
+      const vh = window.innerHeight;
+      /* focus band = middle of the visible text area (below the fixed graphic).
+         graphic is ~50% of viewport (44% on mobile), so bottom half spans ~50–100%.
+         put focus at ~72% of viewport on desktop, adjust for mobile short screens. */
+      const graphicRatio = vh < 700 ? 0.44 : 0.50;
+      const focusY = vh * (graphicRatio + (1 - graphicRatio) * 0.5);
+
+      let best = null, bestDist = Infinity;
+      for (const item of items) {
+        const rect = item.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const dist = Math.abs(center - focusY);
+        if (dist < bestDist) { bestDist = dist; best = item; }
+      }
+
+      for (const item of items) {
+        const on = item === best;
+        if (on !== item.classList.contains('active')) {
+          item.classList.toggle('active', on);
+        }
+      }
+
+      const key = best ? best.dataset.key : null;
+      if (key !== currentKey) {
+        if (currentKey && illoByKey[currentKey]) illoByKey[currentKey].classList.remove('active');
+        if (key && illoByKey[key]) illoByKey[key].classList.add('active');
+        currentKey = key;
+      }
+
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      progress.style.width = pct + '%';
+
+      if (window.scrollY > 40) hint.classList.add('hidden');
+      else hint.classList.remove('hidden');
+    }
+
+    function onScroll () {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+
+    /* GSAP illustration animations — run always, we never see the hidden ones anyway */
+    if (!window.gsap) return;
+
+    gsap.set('#illoHi', { transformOrigin: '75% 75%', rotation: 16 });
+    gsap.timeline({ repeat: -1, repeatDelay: 2.2 })
+      .to('#illoHi', { rotation: -2,  duration: 0.18, ease: 'power2.out' })
+      .to('#illoHi', { rotation: 30,  duration: 0.22, ease: 'sine.inOut' })
+      .to('#illoHi', { rotation: 2,   duration: 0.22, ease: 'sine.inOut' })
+      .to('#illoHi', { rotation: 26,  duration: 0.22, ease: 'sine.inOut' })
+      .to('#illoHi', { rotation: 16,  duration: 0.22, ease: 'power2.inOut' });
+
+    gsap.set('#illoHourglass', { transformOrigin: '50% 50%' });
+    gsap.timeline({ repeat: -1 })
+      .to('#illoHourglass', { rotation: 180, duration: 0.9, ease: 'power2.inOut' })
+      .to({}, { duration: 2.8 })
+      .to('#illoHourglass', { rotation: 360, duration: 0.9, ease: 'power2.inOut' })
+      .set('#illoHourglass', { rotation: 0 })
+      .to({}, { duration: 2.8 });
+
+    gsap.set('#illoHeart', { transformOrigin: 'center center' });
+    gsap.timeline({ repeat: -1 })
+      .to('#illoHeart', { scale: 1.16, duration: 0.14, ease: 'power2.out' })
+      .to('#illoHeart', { scale: 1.00, duration: 0.16, ease: 'power2.inOut' })
+      .to('#illoHeart', { scale: 1.10, duration: 0.13, ease: 'power2.out' })
+      .to('#illoHeart', { scale: 1.00, duration: 0.18, ease: 'power2.inOut' })
+      .to({}, { duration: 0.30 });
+
+    gsap.set('#illoPhone', { transformOrigin: 'center center' });
+    gsap.timeline({ repeat: -1, repeatDelay: 1.4 })
+      .to('#illoPhone', { rotation: -14, duration: 0.06, ease: 'power1.out' })
+      .to('#illoPhone', { rotation: 14,  duration: 0.10, ease: 'sine.inOut' })
+      .to('#illoPhone', { rotation: -12, duration: 0.10, ease: 'sine.inOut' })
+      .to('#illoPhone', { rotation: 10,  duration: 0.10, ease: 'sine.inOut' })
+      .to('#illoPhone', { rotation: 0,   duration: 0.10, ease: 'power2.inOut' });
+
+    /* polaroid photo cycler + gentle sway */
+    const shots = [...document.querySelectorAll('#polaroid .pshot')];
+    let shotIdx = 0;
+    setInterval(() => {
+      shots[shotIdx].classList.remove('active');
+      shotIdx = (shotIdx + 1) % shots.length;
+      shots[shotIdx].classList.add('active');
+    }, 2600);
+
+    gsap.to('#polaroid', {
+      rotation: 2,
+      duration: 3.4,
+      yoyo: true,
+      repeat: -1,
+      ease: 'sine.inOut',
+      transformOrigin: '50% 50%'
+    });
+
+    gsap.set('#illoParty', { transformOrigin: '50% 90%' });
+    gsap.to('#illoParty', { y: -12, duration: 0.75, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+
+    gsap.set('#illoSprout', { transformOrigin: '50% 90%' });
+    gsap.to('#illoSprout', { rotation: 6, duration: 2.4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+
+    gsap.set('#illoGrow', { transformOrigin: 'center center' });
+    gsap.timeline({ repeat: -1 })
+      .to('#illoGrow', { scale: 1.10, duration: 0.7, ease: 'sine.inOut' })
+      .to('#illoGrow', { scale: 1.00, duration: 0.9, ease: 'sine.inOut' })
+      .to({}, { duration: 0.3 });
+
+    /* ---------- CALENDAR ---------- */
+    const CAL_START = new Date('2026-08-01T00:00:00+05:30'); // day 1 = Aug 1, day 35 = Sep 4 (the eve of the anniversary)
+    const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+    const notes = [
+      "you asked if i missed you. i did. you made a sweet.",
+      "\"khana khao. rest karo.\" full caretaker mode.",
+      "\"the thinker baby.\" nickname stuck that day.",
+      "\"goniyee lovee you bugga.\" 400 pet names deep.",
+      "all i could give was 🫂. emoji infrastructure.",
+      "you doubted yourself. i said trust yourself. i meant it.",
+      "you asked if i felt okay before saying good morning.",
+      "\"khana niche rkha do pls.\" married-life energy already.",
+      "i became your unpaid personal stylist that night.",
+      "\"isnt this y2k watch perfect for your boyfriend 👉👈\"",
+      "\"we cute,\" you said. we were.",
+      "\"you smile so beautifully in this photo.\" still do.",
+      "gonnite. love you. our nightly ritual.",
+      "one-hour call past midnight. still not enough.",
+      "you missed one \"i love you.\" i noticed.",
+      "\"moon steals the night. for me it's you.\"",
+      "\"can i get your number?\" \"yours hi hu.\"",
+      "you were the brightest part of my day. still are.",
+      "\"i'm proud of you.\" \"itta pyarr.\" my favorite exchange.",
+      "parathas and hugs. peak comfort person.",
+      "our conversations have their own language.",
+      "two video calls. neither knew how to hang up.",
+      "you slept at 4:35am. \"awww mera cutu kkrh thi.\"",
+      "\"god so sexy.\" my scientific outfit review.",
+      "\"dhyan se\" + \"use my app.\" both true.",
+      "\"you using my app makes me happy.\" still does.",
+      "\"miss you.\" \"miss you more.\" cuties.",
+      "i saw you and lost all composure.",
+      "you showed me your ₹150 gift. tiny things count.",
+      "22-min call. schedule destroyed. affection thriving.",
+      "\"me having your thoughts ❤️.\" dinner turned poetic.",
+      "we bumped. came back to \"love you more.\" that's us.",
+      "\"sundar hai.\" \"we cute.\" two words, whole relationship.",
+      "you tell me the tiny pieces of your day. i love that.",
+      "\"muahhww cutu mere.\" our whole os is pet names."
+    ];
+
+    const flowerColors = [
+      '#eb4d4b','#ff6b8b','#ff8b6a','#f9c74f','#a8c69f','#74b9ff','#b5838d',
+      '#ff5f5f','#ff8fa3','#ffa07a','#ffd166','#82c68f','#8ecae6','#9d8189',
+      '#f88379','#ffb3c1','#ffb997','#e9c46a','#55d47b','#a8dadc','#b56576',
+      '#e77376','#ffc2d1','#ffcbb0','#f4a261','#6b9080','#219ebc','#b08968',
+      '#d64545','#c08497','#e0a458','#d4a373','#7a9270','#457b9d','#eb4d4b'
+    ];
+
+    const calGrid = document.getElementById('calGrid');
+    if (calGrid) {
+      const fmtDate = (d) => `${MONTHS[d.getMonth()]} ${String(d.getDate()).padStart(2,'0')}`;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < 35; i++) {
+        const d = new Date(CAL_START);
+        d.setDate(d.getDate() + i);
+        const isAnniv = (i === 34); // day 35 = Sep 4, the eve of the anniversary — subtle highlight
+        const num = String(i + 1).padStart(2, '0');
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell' + (isAnniv ? ' anniv' : '');
+        cell.innerHTML = `
+          <div class="cal-flower" style="color: ${flowerColors[i]};" data-src="flowers/flower-${num}.svg"></div>
+          <div class="cal-date">${fmtDate(d)}</div>
+          <div class="cal-note">${notes[i]}</div>
+        `;
+        frag.appendChild(cell);
+      }
+      calGrid.appendChild(frag);
+
+      // Inject each flower SVG inline from the preloaded FLOWERS constant.
+      // Black fills are already swapped to currentColor, so parent `color` tints it.
+      document.querySelectorAll('.cal-flower').forEach((el, i) => {
+        if (typeof FLOWERS !== 'undefined' && FLOWERS[i]) {
+          el.innerHTML = FLOWERS[i];
+        }
+      });
+    }
+
+    /* ---------- FINALE: flowers fly out → bunch. Scrub-driven so scroll direction controls it. ---------- */
+    if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+    if (window.ScrollTrigger) {
+      const rand = (a, b) => a + Math.random() * (b - a);
+
+      // Hand-designed bouquet layout — 35 flowers arranged in the paper wrapping.
+      // Coordinates are in a 400×480 composition (top-left origin).
+      // Wrapping image occupies bottom portion (y=160–520 after 40px composition offset).
+      // Flowers cluster in the upper dome (y=0–240 in composition, mapped to finale coords).
+      const BOUQUET_LAYOUT = [
+        {"x":200,"y":8,"rotation":-5,"scale":0.72,"z":8},
+        {"x":175,"y":15,"rotation":-12,"scale":0.68,"z":6},
+        {"x":225,"y":18,"rotation":10,"scale":0.70,"z":7},
+        {"x":150,"y":28,"rotation":-18,"scale":0.75,"z":9},
+        {"x":250,"y":30,"rotation":16,"scale":0.73,"z":9},
+        {"x":110,"y":45,"rotation":-28,"scale":0.82,"z":11},
+        {"x":290,"y":48,"rotation":26,"scale":0.80,"z":11},
+        {"x":195,"y":42,"rotation":-3,"scale":0.88,"z":14},
+        {"x":135,"y":58,"rotation":-22,"scale":0.90,"z":13},
+        {"x":265,"y":60,"rotation":20,"scale":0.92,"z":13},
+        {"x":95,"y":72,"rotation":-32,"scale":0.85,"z":10},
+        {"x":305,"y":75,"rotation":30,"scale":0.87,"z":10},
+        {"x":170,"y":70,"rotation":-8,"scale":1.05,"z":18},
+        {"x":230,"y":72,"rotation":9,"scale":1.03,"z":18},
+        {"x":200,"y":85,"rotation":0,"scale":1.15,"z":22},
+        {"x":125,"y":95,"rotation":-20,"scale":0.98,"z":16},
+        {"x":275,"y":98,"rotation":22,"scale":1.00,"z":16},
+        {"x":155,"y":108,"rotation":-10,"scale":1.10,"z":20},
+        {"x":245,"y":110,"rotation":12,"scale":1.08,"z":20},
+        {"x":195,"y":115,"rotation":-4,"scale":1.18,"z":24},
+        {"x":100,"y":118,"rotation":-30,"scale":0.90,"z":12},
+        {"x":300,"y":120,"rotation":28,"scale":0.92,"z":12},
+        {"x":180,"y":132,"rotation":-6,"scale":1.12,"z":21},
+        {"x":220,"y":135,"rotation":8,"scale":1.10,"z":21},
+        {"x":140,"y":142,"rotation":-24,"scale":0.95,"z":15},
+        {"x":260,"y":145,"rotation":24,"scale":0.97,"z":15},
+        {"x":200,"y":150,"rotation":-2,"scale":1.08,"z":23},
+        {"x":165,"y":160,"rotation":-14,"scale":0.90,"z":17},
+        {"x":235,"y":162,"rotation":15,"scale":0.92,"z":17},
+        {"x":120,"y":158,"rotation":-32,"scale":0.85,"z":11},
+        {"x":280,"y":115,"rotation":30,"scale":0.87,"z":11},
+        {"x":195,"y":172,"rotation":-5,"scale":0.95,"z":19},
+        {"x":155,"y":182,"rotation":-18,"scale":0.82,"z":14},
+        {"x":245,"y":184,"rotation":18,"scale":0.83,"z":14},
+        {"x":200,"y":192,"rotation":0,"scale":0.78,"z":16}
+      ];
+      const COMPOSITION_W = 400;
+      const COMPOSITION_H = 480;
+      const COMPOSITION_OFFSET_Y = 40; // finale-relative y where composition starts
+
+      function buildFinale () {
+        const flowers = gsap.utils.toArray('.cal-flower');
+        const finale  = document.getElementById('finale');
+        if (!flowers.length || !finale) return;
+
+        const finaleTop = finale.offsetTop;
+        const finaleW   = finale.offsetWidth;
+
+        // Read the actual paper wrap width so the whole composition scales with it.
+        const wrapEl = finale.querySelector('.bouquet-wrap');
+        const wrapW = wrapEl ? (wrapEl.getBoundingClientRect().width || wrapEl.offsetWidth || COMPOSITION_W) : COMPOSITION_W;
+        const scale = Math.max(0.4, Math.min(1, wrapW / COMPOSITION_W));
+
+        // Scaled composition size, horizontally centered inside .finale.
+        const scaledCompW = COMPOSITION_W * scale;
+        const compOffsetX = (finaleW - scaledCompW) / 2;
+        const compOffsetY = COMPOSITION_OFFSET_Y * scale;
+
+        const masterTl = gsap.timeline({ paused: true });
+
+        // Reveal the paper wrapping early in the timeline
+        masterTl.to('.bouquet-wrap', { opacity: 1, duration: 0.4, ease: 'power2.out' }, 0);
+
+        flowers.forEach((flower, i) => {
+          const rect = flower.getBoundingClientRect();
+
+          // Convert cal-flower's current viewport rect into .finale-relative coords.
+          const initialLeft = rect.left;
+          const initialTop  = rect.top + window.scrollY - finaleTop;
+
+          const spot = BOUQUET_LAYOUT[i] || BOUQUET_LAYOUT[0];
+
+          const clone = document.createElement('div');
+          clone.className = 'flying-flower';
+          clone.innerHTML = flower.innerHTML;
+          clone.style.left    = initialLeft + 'px';
+          clone.style.top     = initialTop  + 'px';
+          clone.style.width   = rect.width  + 'px';
+          clone.style.height  = rect.height + 'px';
+          clone.style.color   = flowerColors[i] || '#eb4d4b';
+          clone.style.opacity = '0';
+          clone.style.zIndex  = String(5 + spot.z); // 6..40 → strategic layering
+          finale.appendChild(clone);
+
+          // Target position — designed spot inside the composition, scaled and centered in finale coords.
+          const targetLeft = compOffsetX + spot.x * scale - (rect.width  * scale * spot.scale) / 2;
+          const targetTop  = compOffsetY + spot.y * scale - (rect.height * scale * spot.scale) / 2;
+
+          const dx = targetLeft - initialLeft;
+          const dy = targetTop  - initialTop;
+
+          const start = rand(0, 0.4);
+
+          // Crossfade + fly in. Flower size is multiplied by the wrap scale so
+          // the bouquet stays proportional on smaller viewports.
+          masterTl.to(clone,  { opacity: 1, duration: 0.15, ease: 'none' }, start);
+          masterTl.to(flower, { opacity: 0, duration: 0.15, ease: 'none' }, start);
+          masterTl.to(clone, {
+            x: dx,
+            y: dy,
+            rotation: spot.rotation,
+            scale: spot.scale * scale,
+            duration: 1.4,
+            ease: 'power2.inOut'
+          }, start);
+        });
+
+        // Message reveal at the tail of the timeline
+        masterTl.to('.finale-mark',   { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 1.8);
+        masterTl.to('.finale-title',  { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 1.9);
+        masterTl.to('.finale-hearts', { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 2.1);
+        masterTl.to('.finale-hehe',   { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 2.3);
+
+        // Scrub-driven: scroll position controls timeline progress. Reverses automatically.
+        const st = ScrollTrigger.create({
+          trigger: '.finale',
+          start: 'top 85%',
+          end:   'top 25%',
+          animation: masterTl,
+          scrub: 1
+        });
+
+        return { masterTl, st };
+      }
+
+      // Independent heartbeat on <333 — only visually noticeable once opacity > 0.
+      // Set once here so we don't stack a new tween every rebuild.
+      gsap.to('.finale-hearts', {
+        scale: 1.08,
+        duration: 1.3,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        transformOrigin: 'center center'
+      });
+
+      // Build immediately — calendar is populated synchronously above this block.
+      let finaleState = buildFinale();
+
+      // Rebuild on resize/orientation-change so the bouquet re-scales to the
+      // new wrap width and the flying-flower target coords stay accurate.
+      let lastW = window.innerWidth;
+      let resizeT;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(() => {
+          const newW = window.innerWidth;
+          // Only fully rebuild if width actually changed (skips iOS URL-bar resizes).
+          if (Math.abs(newW - lastW) > 4) {
+            lastW = newW;
+            if (finaleState) {
+              try { finaleState.st && finaleState.st.kill(); } catch (e) {}
+              try { finaleState.masterTl && finaleState.masterTl.kill(); } catch (e) {}
+            }
+            // Remove old clones and reset originals.
+            document.querySelectorAll('.flying-flower').forEach(el => el.remove());
+            document.querySelectorAll('.cal-flower').forEach(el => { el.style.opacity = ''; });
+            // Reset the message elements' opacity/y so the timeline can re-tween them.
+            gsap.set(['.finale-mark', '.finale-title', '.finale-hearts', '.finale-hehe', '.bouquet-wrap'], { clearProps: 'opacity,transform,y' });
+            finaleState = buildFinale();
+          }
+          ScrollTrigger.refresh();
+        }, 200);
+      });
+    }
+  })();
+  </script>
+
+</body>
+</html>

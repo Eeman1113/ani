@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+
+# for divi. not for search engines.
