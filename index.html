@@ -17,6 +17,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="_flowers_inline.js"></script>
+  <script src="letter_timings.js"></script>
 
   <style>
     :root {
@@ -45,16 +46,6 @@
       overflow-x: hidden;
     }
     body { min-height: 100vh; min-height: 100dvh; }
-
-    .mark {
-      position: fixed;
-      top: 22px;
-      left: 26px;
-      font-family: 'Geist Mono', monospace;
-      font-size: 13px;
-      color: var(--mute);
-      z-index: 40;
-    }
 
     /* TOP HALF — sticky illustration */
     .graphic {
@@ -265,13 +256,95 @@
     }
     .scroll-hint.hidden { opacity: 0; }
 
+    /* voice play button — top-left, sits above the "for divi." mark */
+    .play-btn {
+      position: fixed;
+      top: 20px;
+      left: 26px;
+      z-index: 60;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--paper);
+      border: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(10,10,10,0.18);
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                  background 200ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .play-btn:hover { transform: scale(1.06); background: var(--red); }
+    .play-btn:active { transform: scale(0.96); }
+    .play-btn svg { width: 14px; height: 14px; display: block; }
+    .play-btn .ic-pause { display: none; }
+    .play-btn.playing .ic-play { display: none; }
+    .play-btn.playing .ic-pause { display: block; }
+    .play-btn.playing { background: var(--red); }
+    /* soft pulse ring while playing */
+    .play-btn.playing::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px solid var(--red);
+      opacity: 0.6;
+      animation: playPulse 1.6s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes playPulse {
+      0%   { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.55); opacity: 0; }
+    }
+    .play-btn .play-label {
+      position: absolute;
+      left: 46px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Geist Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      color: var(--mute);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+    .play-btn.playing .play-label { color: var(--red); opacity: 1; }
+
+    /* karaoke word highlight */
+    .w {
+      display: inline;
+      transition: color 160ms ease, background-color 160ms ease, text-shadow 160ms ease;
+      border-radius: 3px;
+      padding: 0 1px;
+    }
+    .w.speaking {
+      color: var(--red);
+      background: rgba(235, 77, 75, 0.10);
+      text-shadow: 0 0 0.01px currentColor;
+    }
+    /* when speaking, the containing sentence should also feel bright even if scroll hasn't caught up */
+    .text-item:has(.w.speaking) { opacity: 1; }
+    /* counter spans keep their own color; use underline to indicate speaking */
+    .n.w.speaking {
+      background: transparent;
+      text-shadow: none;
+      box-shadow: inset 0 -0.14em 0 rgba(235, 77, 75, 0.28);
+    }
+
     /* Mobile — phones */
     @media (max-width: 640px) {
-      .mark {
-        top: max(14px, env(safe-area-inset-top));
-        left: max(16px, env(safe-area-inset-left));
-        font-size: 11px;
+      .play-btn {
+        top: max(12px, env(safe-area-inset-top));
+        left: max(14px, env(safe-area-inset-left));
+        width: 32px;
+        height: 32px;
       }
+      .play-btn svg { width: 12px; height: 12px; }
+      .play-btn .play-label { font-size: 11px; letter-spacing: 0; left: 42px; }
       .graphic {
         height: 44vh;
         height: 44dvh;
@@ -645,7 +718,19 @@
 </head>
 <body>
 
-  <div class="mark">for divi.</div>
+  <!-- voice play button — top-left. plays a studio-isolated read of the letter,
+       ducks the bg song while playing, highlights each spoken word and keeps
+       the current word centered in the reading band. -->
+  <button id="playLetter" class="play-btn" type="button" aria-label="play spoken letter">
+    <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5.5v13l11-6.5-11-6.5z"/>
+    </svg>
+    <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+    </svg>
+    <span class="play-label">for divi.</span>
+  </button>
+  <audio id="voiceAudio" src="letter_voice.mp3" preload="auto"></audio>
 
   <!-- ambient bg music — browsers block autoplay w/ sound until first user gesture;
        we try autoplay, and if blocked, start on the very first scroll/click/touch. -->
@@ -1215,6 +1300,169 @@
         }, 200);
       });
     }
+  })();
+  </script>
+
+  <!-- karaoke: click play, spoken letter takes over, current word highlights, page follows -->
+  <script>
+  (function () {
+    const timings = window.LETTER_TIMINGS;
+    const btn = document.getElementById('playLetter');
+    const voice = document.getElementById('voiceAudio');
+    const bg = document.getElementById('bgSong');
+    if (!timings || !btn || !voice) return;
+
+    /* ---------- 1. wrap letter words with <span class="w">, keyed to timings ---------- */
+    /* how many script tokens each existing counter span (.n) consumes, in DOM order:
+       seconds(10) heartbeats(10) 731(4) inf-memories(1) inf-happiness(1) life(1) */
+    const nConsumes = [10, 10, 4, 1, 1, 1];
+    let nIdx = 0;
+    let scriptIdx = 0;
+    const wordEls = []; // ordered by script index; each entry: {el, iStart, iEnd, start, end}
+
+    function attachTiming(el, count) {
+      const startT = timings[scriptIdx] ? timings[scriptIdx].start : 0;
+      const endI = Math.min(scriptIdx + count - 1, timings.length - 1);
+      const endT = timings[endI] ? timings[endI].end : startT;
+      el.dataset.start = startT;
+      el.dataset.end = endT;
+      wordEls.push({ el, iStart: scriptIdx, iEnd: endI, start: startT, end: endT });
+      scriptIdx += count;
+    }
+
+    function tokenize(root) {
+      const kids = Array.from(root.childNodes);
+      for (const node of kids) {
+        if (node.nodeType === 3) {
+          // text node -> split into words, wrap each in <span class="w">
+          const text = node.textContent;
+          if (!/\S/.test(text)) continue;
+          const frag = document.createDocumentFragment();
+          const re = /(\s+)|(\S+)/g;
+          let m;
+          while ((m = re.exec(text)) !== null) {
+            if (m[1]) {
+              frag.appendChild(document.createTextNode(m[1]));
+            } else {
+              const s = document.createElement('span');
+              s.className = 'w';
+              s.textContent = m[2];
+              attachTiming(s, 1);
+              frag.appendChild(s);
+            }
+          }
+          root.replaceChild(frag, node);
+        } else if (node.nodeType === 1) {
+          if (node.classList.contains('n')) {
+            const count = nConsumes[nIdx++] || 1;
+            node.classList.add('w');
+            attachTiming(node, count);
+          } else if (node.classList.contains('comma') || node.classList.contains('heart-inline')) {
+            // pure decoration — no script token
+          } else {
+            tokenize(node); // e.g. <em>
+          }
+        }
+      }
+    }
+
+    /* only the letter/hero paragraphs in the reading column, in order */
+    const paras = document.querySelectorAll('.text-column .text-item p');
+    paras.forEach(tokenize);
+
+    if (wordEls.length === 0) return; // nothing to sync
+
+    /* ---------- 2. karaoke tick ---------- */
+    let rafId = 0;
+    let cursor = 0; // index into wordEls, monotonic when playing forward
+    let currentActive = null;
+    let lastScrollTs = 0;
+
+    function scrollToWord(el, force) {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const graphicRatio = vh < 700 ? 0.44 : 0.50;
+      const targetY = vh * (graphicRatio + (1 - graphicRatio) * 0.5); // ~75% of viewport
+      const wordCenter = rect.top + rect.height / 2;
+      const delta = wordCenter - targetY;
+      const now = performance.now();
+      // debounce: only scroll if drifted meaningfully OR forced
+      if (!force && Math.abs(delta) < vh * 0.06) return;
+      if (!force && now - lastScrollTs < 220) return;
+      lastScrollTs = now;
+      window.scrollBy({ top: delta, behavior: 'smooth' });
+    }
+
+    function pickWord(t) {
+      /* advance cursor forward if possible; if user seeked backward, reset */
+      if (cursor >= wordEls.length) cursor = wordEls.length - 1;
+      if (cursor > 0 && t < wordEls[cursor].start - 0.3) {
+        // seeked backward — linear rewind
+        while (cursor > 0 && wordEls[cursor].start > t) cursor--;
+      }
+      while (cursor + 1 < wordEls.length && wordEls[cursor + 1].start <= t) cursor++;
+      const w = wordEls[cursor];
+      // consider it "speaking" from its start until the next word's start
+      const nextStart = cursor + 1 < wordEls.length ? wordEls[cursor + 1].start : w.end + 1;
+      if (t >= w.start && t < nextStart) return w;
+      return null;
+    }
+
+    function tick() {
+      const t = voice.currentTime;
+      const w = pickWord(t);
+      if (w && w.el !== currentActive) {
+        if (currentActive) currentActive.classList.remove('speaking');
+        w.el.classList.add('speaking');
+        currentActive = w.el;
+        scrollToWord(w.el, false);
+      }
+      if (!voice.paused && !voice.ended) rafId = requestAnimationFrame(tick);
+    }
+
+    /* ---------- 3. play / pause / end ---------- */
+    let bgWasPlaying = false;
+
+    function startVoice() {
+      // pause bg (remember its state so we can resume)
+      bgWasPlaying = bg && !bg.paused;
+      if (bg && bgWasPlaying) { try { bg.pause(); } catch (e) {} }
+      // jump reader to the top so the intro is in view
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // seed the first word so highlight appears immediately even before rAF
+      cursor = 0;
+      if (currentActive) currentActive.classList.remove('speaking');
+      currentActive = wordEls[0].el;
+      currentActive.classList.add('speaking');
+      voice.currentTime = 0;
+      voice.volume = 1.0;
+      const p = voice.play();
+      if (p && p.catch) p.catch(() => {});
+      btn.classList.add('playing');
+      btn.setAttribute('aria-label', 'pause spoken letter');
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stopVoice(resumeBg) {
+      voice.pause();
+      cancelAnimationFrame(rafId);
+      btn.classList.remove('playing');
+      btn.setAttribute('aria-label', 'play spoken letter');
+      if (currentActive) { currentActive.classList.remove('speaking'); currentActive = null; }
+      if (resumeBg && bg && bgWasPlaying) { try { bg.play(); } catch (e) {} }
+    }
+
+    btn.addEventListener('click', () => {
+      if (voice.paused || voice.ended) startVoice();
+      else stopVoice(true);
+    });
+
+    voice.addEventListener('ended', () => stopVoice(true));
+    // if user pauses via other means (system controls), sync UI
+    voice.addEventListener('pause', () => {
+      if (!voice.ended) btn.classList.toggle('playing', !voice.paused);
+    });
   })();
   </script>
 
