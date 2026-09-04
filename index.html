@@ -654,7 +654,7 @@
     (function () {
       const a = document.getElementById('bgSong');
       if (!a) return;
-      a.volume = 0.3;
+      a.volume = 0.1;
       const tryPlay = () => { a.play().catch(() => {}); };
       tryPlay();
       const kick = () => { tryPlay(); off(); };
