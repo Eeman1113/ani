@@ -601,6 +601,15 @@
       transform: translateY(8px);
     }
 
+    /* mid screens (tablet / small laptop) — title was crashing into the bouquet
+       because `clamp(48px, 9.5vw, 132px)` gets huge on ~800–1200px viewports.
+       Cap it lower here and give the message more bottom padding. */
+    @media (min-width: 641px) and (max-width: 1200px) {
+      .finale-title { font-size: clamp(44px, 6.8vw, 84px); }
+      .finale-inner { padding: 0 24px 22vh; padding: 0 24px 22dvh; }
+      .finale { min-height: 115vh; min-height: 115dvh; }
+    }
+
     /* softer bokeh sizing on mobile */
     @media (max-width: 640px) {
       .finale { min-height: 120vh; min-height: 120dvh; }
