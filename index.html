@@ -646,6 +646,30 @@
 <body>
 
   <div class="mark">for divi.</div>
+
+  <!-- ambient bg music — browsers block autoplay w/ sound until first user gesture;
+       we try autoplay, and if blocked, start on the very first scroll/click/touch. -->
+  <audio id="bgSong" src="song.mp3" loop preload="auto"></audio>
+  <script>
+    (function () {
+      const a = document.getElementById('bgSong');
+      if (!a) return;
+      a.volume = 0.3;
+      const tryPlay = () => { a.play().catch(() => {}); };
+      tryPlay();
+      const kick = () => { tryPlay(); off(); };
+      const off = () => {
+        window.removeEventListener('pointerdown', kick);
+        window.removeEventListener('keydown', kick);
+        window.removeEventListener('scroll', kick);
+        window.removeEventListener('touchstart', kick);
+      };
+      window.addEventListener('pointerdown', kick, { once: true });
+      window.addEventListener('keydown',     kick, { once: true });
+      window.addEventListener('scroll',      kick, { once: true, passive: true });
+      window.addEventListener('touchstart',  kick, { once: true, passive: true });
+    })();
+  </script>
   <div class="progress" id="progress"></div>
 
   <!-- FIXED TOP HALF: illustrations stacked, only .active is visible -->
